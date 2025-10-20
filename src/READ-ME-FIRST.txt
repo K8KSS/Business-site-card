@@ -1,0 +1,211 @@
+============================================================
+                   IMPORTANT - READ FIRST!
+============================================================
+
+Music Teacher Website
+Elena Parfirova
+
+============================================================
+
+
++-----------------------------------------------------------+
+|  QUICK START (2 CLICKS)                                   |
++-----------------------------------------------------------+
+
+  1. Double-click: REINSTALL.bat
+     (Or use: install-alternative.bat / INSTALL-NOW.bat)
+  
+  2. Double-click: start-windows.bat
+  
+  3. Open in browser: http://localhost:5173
+  
+  DONE!
+  
+  
+  Got "vite not found" error?
+  → Use REINSTALL.bat (it fixes everything)
+
+
++-----------------------------------------------------------+
+|  WHAT'S IN THIS FOLDER                                    |
++-----------------------------------------------------------+
+
+  INSTALLATION:
+     REINSTALL.bat             <- Complete reinstall (fixes most issues)
+     CHECK-INSTALLATION.bat    <- Check what's installed
+     INSTALL-NOW.bat           <- Install project (once!)
+     install-alternative.bat   <- If you get errors
+     diagnose.bat              <- Check system requirements
+  
+  STARTING:
+     start-windows.bat    <- Start website
+  
+  INSTRUCTIONS:
+     QUICK-START.txt     <- Start here
+     START_HERE.md       <- Full instructions
+     QUICK-FIX.md        <- Quick problem solving
+     USER_GUIDE.md       <- How to use website
+
+
++-----------------------------------------------------------+
+|  IF YOU GET AN ERROR                                      |
++-----------------------------------------------------------+
+
+  No styles? Plain text? Huge images?
+     FIXED! Just refresh browser (F5 or Ctrl+R)
+     See: ИСПРАВЛЕНО-СТИЛИ.txt (Russian)
+     Or:  FIX-NO-STYLES.txt (English)
+
+  Error "vite is not recognized" or "vite не является командой"?
+     → Run: REINSTALL.bat
+     See: СДЕЛАЙ-ЭТО-СЕЙЧАС.txt (Russian)
+     Or:  FIX-VITE-NOT-FOUND.txt (English)
+
+  Error "Failed to resolve import @radix-ui..."?
+     FIXED! Just refresh browser or restart server.
+     See: ИСПРАВЛЕНО-ИМПОРТЫ.txt (Russian)
+     Or:  FIX-IMPORT-ERROR.txt (English)
+
+  Error "Missing script: setup" or dependency errors?
+  
+  SOLUTION 1:
+     Run file: INSTALL-NOW.bat
+  
+  SOLUTION 2 (if Solution 1 fails):
+     Run file: install-alternative.bat
+     
+     This uses --legacy-peer-deps flag which:
+     - Bypasses dependency conflicts
+     - Works with incompatible versions
+     - Solves ERESOLVE errors
+  
+  DIAGNOSTICS:
+     Run: diagnose.bat
+     It will show what's not working
+
+
++-----------------------------------------------------------+
+|  REQUIREMENTS                                             |
++-----------------------------------------------------------+
+
+  * Node.js version 18 or higher
+    Download: https://nodejs.org/
+    Choose LTS version (green button)
+  
+  * Windows 7/8/10/11
+  
+  * 1 GB free space
+  
+  * Internet connection (only for installation)
+
+
++-----------------------------------------------------------+
+|  STEP-BY-STEP INSTRUCTIONS                                |
++-----------------------------------------------------------+
+
+  STEP 1: Install Node.js
+         https://nodejs.org/ -> Download LTS -> Install
+         Restart computer after installation!
+  
+  STEP 2: Install project
+         Double-click: INSTALL-NOW.bat
+         Wait 2-5 minutes
+  
+  STEP 3: Start website
+         Double-click: start-windows.bat
+  
+  STEP 4: Open in browser
+         http://localhost:5173
+
+
++-----------------------------------------------------------+
+|  ADMIN PANEL                                              |
++-----------------------------------------------------------+
+
+  Click 3 times on logo (musical note at top)
+  Password: admin
+  
+  In admin panel you can:
+  - Add publications
+  - Upload photos and videos
+  - Moderate reviews
+  - View messages
+
+
++-----------------------------------------------------------+
+|  HELP                                                     |
++-----------------------------------------------------------+
+
+  Installation problems?
+  -> See: TROUBLESHOOTING.md
+  
+  How to use website?
+  -> See: USER_GUIDE.md
+  
+  First run?
+  -> See: QUICK-START.txt
+  
+  Full documentation?
+  -> See: README.md
+
+
++-----------------------------------------------------------+
+|  FAQ                                                      |
++-----------------------------------------------------------+
+
+  Q: Do I need internet to run?
+  A: No, website runs locally on your PC
+  
+  Q: Where is my data stored?
+  A: In file server/database.sqlite
+  
+  Q: Can I use this in production?
+  A: Yes, but security setup needed
+  
+  Q: How to make backup?
+  A: Copy the server/ folder
+  
+  Q: Forgot admin password
+  A: Open server/index.js and change password
+
+
++-----------------------------------------------------------+
+|  WEBSITE FEATURES                                         |
++-----------------------------------------------------------+
+
+  For visitors:
+  - Publications (10 categories)
+  - Photo albums with gallery
+  - Teacher achievements
+  - Portfolio with diplomas
+  - Reviews with ratings
+  - Contact form
+  - Audio player
+  - Video player
+  
+  For administrator:
+  - Add content
+  - Edit
+  - Delete
+  - Moderate reviews
+  - Statistics
+
+
++-----------------------------------------------------------+
+|  HOW TO STOP SERVER                                       |
++-----------------------------------------------------------+
+
+  In command prompt window press:
+  
+  Ctrl + C
+  
+  Confirm: Y
+
+
+============================================================
+
+           Created with love for children!
+           
+           Enjoy working with the website!
+
+============================================================

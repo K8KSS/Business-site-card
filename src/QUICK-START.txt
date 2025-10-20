@@ -1,0 +1,142 @@
+============================================================
+                    QUICK START GUIDE
+         Music Teacher Website - Installation & Setup
+============================================================
+
+
+============================================================
+  STEP 1: INSTALL NODE.JS (if not already installed)
+============================================================
+
+1. Open browser
+2. Go to: https://nodejs.org/
+3. Download LTS version (green button)
+4. Run installer
+5. Click "Next" everywhere
+6. Restart computer
+
+
+============================================================
+  STEP 2: INSTALL PROJECT
+============================================================
+
+EASIEST WAY:
+
+1. Find in project folder:
+   
+   INSTALL-NOW.bat
+
+2. Double-click on it
+
+3. Wait 2-5 minutes
+
+4. Done!
+
+
+============================================================
+  STEP 3: START THE WEBSITE
+============================================================
+
+Double-click on:
+
+   start-windows.bat
+
+Or in command prompt:
+
+   npm run dev
+
+
+============================================================
+  STEP 4: OPEN WEBSITE
+============================================================
+
+Open browser and enter:
+
+   http://localhost:5173
+
+
+============================================================
+  ADMIN PANEL ACCESS
+============================================================
+
+1. Click 3 TIMES on the logo (musical note at top)
+2. Enter password: admin
+3. Click "Login"
+
+Now you can add publications, photos, videos!
+
+
+============================================================
+  IF SOMETHING DOESN'T WORK
+============================================================
+
+Run file:
+
+   diagnose.bat
+
+It will show what's wrong.
+
+Or check files:
+   - QUICK-FIX.md (quick solution)
+   - TROUBLESHOOTING.md (detailed help)
+
+
+============================================================
+  USEFUL FILES
+============================================================
+
+INSTALL-NOW.bat        - Automatic installation
+start-windows.bat      - Start website
+diagnose.bat           - Diagnostics
+
+QUICK-FIX.md          - Quick problem solving
+START_HERE.md         - Main documentation
+USER_GUIDE.md         - User manual
+TROUBLESHOOTING.md    - Problem solving
+
+
+============================================================
+  COMMON QUESTIONS
+============================================================
+
+Q: Do I need internet for the website to work?
+A: No, it works on your local computer
+
+Q: Where is data stored?
+A: In file server/database.sqlite
+
+Q: How to stop the server?
+A: Press Ctrl+C in command prompt window
+
+Q: How to start next time?
+A: Just run: start-windows.bat
+
+Q: Can I use on other computers?
+A: Yes, copy entire project folder
+
+
+============================================================
+  QUICK CHEAT SHEET
+============================================================
+
+Installation (first time):
+   INSTALL-NOW.bat
+
+Starting (every time):
+   start-windows.bat
+
+Stop:
+   Ctrl+C
+
+Open website:
+   http://localhost:5173
+
+Admin panel:
+   3 clicks on logo + password: admin
+
+
+============================================================
+
+         Enjoy working with the website!
+
+============================================================

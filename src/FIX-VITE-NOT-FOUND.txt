@@ -1,0 +1,121 @@
+============================================================
+              VITE NOT FOUND - SOLUTION
+         "vite is not recognized as a command"
+============================================================
+
+
+PROBLEM:
+  Dependencies (node_modules) are not installed in this folder!
+
+
+============================================================
+  QUICK SOLUTION (choose one):
+============================================================
+
+
+OPTION 1 - AUTOMATIC REINSTALL (EASIEST):
+------------------------------------------
+
+  1. Find and run:
+     
+     REINSTALL.bat
+  
+  2. Wait 3-5 minutes
+  
+  3. Done!
+
+
+OPTION 2 - CHECK WHAT'S WRONG:
+-------------------------------
+
+  1. Run:
+     
+     CHECK-INSTALLATION.bat
+  
+  2. See what's wrong
+  
+  3. Follow the instructions
+
+
+OPTION 3 - MANUAL VIA COMMAND LINE:
+------------------------------------
+
+  Open PowerShell or CMD in project folder:
+  
+  1. Click address bar in File Explorer
+  2. Type: cmd
+  3. Press Enter
+  
+  Then run these commands:
+  
+  npm cache clean --force
+  npm install --legacy-peer-deps
+  npm run setup
+  npm run dev
+
+
+============================================================
+  IMPORTANT! CHECK YOU'RE IN THE RIGHT FOLDER:
+============================================================
+
+  The folder MUST contain these files:
+  
+  ✅ package.json
+  ✅ App.tsx
+  ✅ server (folder)
+  ✅ components (folder)
+  ✅ vite.config.ts
+  
+  If these files are NOT there - you're in the wrong folder!
+
+
+============================================================
+  WHY DID THIS HAPPEN?
+============================================================
+
+  Possible reasons:
+  
+  1. You opened project from different folder
+  2. node_modules were not installed
+  3. Installation was interrupted with error
+  4. Files were copied without node_modules
+
+
+============================================================
+  AFTER INSTALLATION:
+============================================================
+
+  Start website one of these ways:
+  
+  METHOD 1:
+    Double-click: start-windows.bat
+  
+  METHOD 2:
+    In command line: npm run dev
+  
+  
+  Then open browser:
+    http://localhost:5173
+  
+  
+  Admin panel:
+    Click logo 3 times
+    Password: admin
+
+
+============================================================
+  IF NOTHING HELPS:
+============================================================
+
+  1. Make sure you're in project folder (where package.json is)
+  
+  2. Run: CHECK-INSTALLATION.bat
+  
+  3. Copy output and send to developer
+
+
+============================================================
+
+              Use REINSTALL.bat !
+
+============================================================
