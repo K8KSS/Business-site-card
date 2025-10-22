@@ -4,7 +4,7 @@ import { Mail, Send, User, MessageSquare, Phone, CheckCircle } from "lucide-reac
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { messagesApi } from "../utils/supabase/client";
 
 export default function FeedbackForm() {

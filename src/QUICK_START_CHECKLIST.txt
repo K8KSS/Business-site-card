@@ -1,0 +1,171 @@
+================================================================================
+                    QUICK START CHECKLIST
+              Music Teacher Website - Setup Guide
+================================================================================
+
+STEP 1: INSTALL DEPENDENCIES
+=============================
+[ ] Open terminal in project folder
+[ ] Run: npm install
+[ ] Wait for installation to complete
+
+
+STEP 2: START DEVELOPMENT SERVER
+=================================
+[ ] Option A: Double-click START.bat
+    Then choose option 2
+
+[ ] Option B: Run command
+    npm run dev:client
+
+[ ] Open browser: http://localhost:5173
+[ ] Check that website loads correctly
+
+
+STEP 3: DEPLOY EDGE FUNCTIONS (For Full Functionality)
+=======================================================
+[ ] Install Supabase CLI:
+    npm install -g supabase
+    
+[ ] Run deployment script:
+    Double-click DEPLOY_EDGE_FUNCTIONS.bat
+    OR run START.bat and choose option 5
+
+[ ] Follow authorization steps (first time only)
+
+[ ] Wait for "DEPLOYMENT COMPLETE!" message
+
+[ ] Test deployment:
+    Open: https://oqazxfewxttctehgftuy.supabase.co/functions/v1/make-server-322de762/health
+
+
+STEP 4: TEST ADMIN PANEL
+=========================
+[ ] Open website: http://localhost:5173
+
+[ ] Open admin panel:
+    Press: Ctrl + Shift + A
+    OR triple-click on logo
+
+[ ] Try uploading a test photo
+
+[ ] Check that no 404 errors appear
+
+
+STEP 5: DEPLOY TO HOSTING (Optional)
+=====================================
+[ ] Build production version:
+    npm run build
+
+[ ] Deploy to Netlify or Vercel:
+    - Netlify: Connect repository or drag dist/ folder
+    - Vercel: Import project from Git
+
+[ ] Set environment variables on hosting:
+    VITE_SUPABASE_URL=your_url
+    VITE_SUPABASE_ANON_KEY=your_key
+
+[ ] Test deployed website
+
+
+TROUBLESHOOTING
+===============
+
+Problem: "npm command not found"
+---------------------------------
+[ ] Install Node.js from: https://nodejs.org/
+[ ] Restart terminal after installation
+
+
+Problem: "Supabase CLI not installed"
+--------------------------------------
+[ ] Run: npm install -g supabase
+[ ] OR use scoop: scoop install supabase
+[ ] Restart terminal
+
+
+Problem: "HTTP 404 errors in admin"
+------------------------------------
+[ ] Check that Edge Functions are deployed
+[ ] Run: DEPLOY_EDGE_FUNCTIONS.bat
+[ ] Check deployment URL works:
+    https://oqazxfewxttctehgftuy.supabase.co/functions/v1/make-server-322de762/health
+
+
+Problem: "Styles not working"
+------------------------------
+[ ] Hard refresh browser: Ctrl + Shift + R
+[ ] Clear Vite cache: delete node_modules/.vite/
+[ ] Restart dev server
+
+
+Problem: "Port 5173 already in use"
+------------------------------------
+[ ] Stop other processes using port
+[ ] OR change port in vite.config.ts
+
+
+USEFUL FILES
+============
+START.bat                           - Main menu for all commands
+DEPLOY_EDGE_FUNCTIONS.bat          - Deploy Edge Functions script
+EDGE_FUNCTIONS_DEPLOY_GUIDE.md     - Full deployment guide (English)
+ИНСТРУКЦИЯ_ДЕПЛОЙ_EDGE_FUNCTIONS.txt - Full deployment guide (Russian)
+README.md                           - Complete documentation
+
+
+HELPFUL COMMANDS
+================
+npm install                - Install dependencies
+npm run dev:client         - Start development server
+npm run build              - Build for production
+npm run preview            - Preview production build
+supabase login             - Login to Supabase
+supabase functions deploy  - Deploy Edge Functions
+
+
+ADMIN PANEL SHORTCUTS
+=====================
+Ctrl + Shift + A           - Open admin panel
+Triple-click logo          - Alternative way to open admin
+Esc                        - Close admin panel
+
+
+SUPPORT
+=======
+If you encounter issues:
+1. Check the TROUBLESHOOTING section above
+2. Read EDGE_FUNCTIONS_DEPLOY_GUIDE.md
+3. Review Supabase Dashboard logs
+4. Ensure you have internet connection
+5. Check Node.js version: node --version (need 18+)
+
+
+PROJECT STATUS CHECKLIST
+=========================
+After setup, you should see:
+[ ] ✓ Website loads at http://localhost:5173
+[ ] ✓ All sections visible (Home, About, Publications, etc.)
+[ ] ✓ Admin panel opens (Ctrl + Shift + A)
+[ ] ✓ Edge Functions deployed (no 404 errors)
+[ ] ✓ Can upload files in admin panel
+[ ] ✓ Production build works (npm run build)
+[ ] ✓ Ready to deploy to hosting
+
+
+================================================================================
+                        ALL DONE! 🎉
+        Your Music Teacher Website is ready to use!
+================================================================================
+
+Next steps:
+1. Customize content through admin panel
+2. Add your own photos, publications, achievements
+3. Deploy to hosting (Netlify/Vercel)
+4. Share your new website!
+
+================================================================================
+Last Updated: October 22, 2025
+Project: Music Teacher Website
+Tech Stack: React + TypeScript + Tailwind + Supabase
+================================================================================

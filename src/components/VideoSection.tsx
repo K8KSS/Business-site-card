@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Video as VideoIcon, Play, X, Eye, Download, Calendar } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { videosApi } from "../utils/supabase/client";
@@ -171,9 +171,11 @@ export default function VideoSection() {
                   </div>
 
                   {/* Duration Badge */}
-                  <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm">
-                    {video.duration}
-                  </div>
+                  {video.duration && (
+                    <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm">
+                      {video.duration}
+                    </div>
+                  )}
 
                   {/* Category Badge */}
                   <div className="absolute top-3 left-3">
@@ -290,10 +292,12 @@ export default function VideoSection() {
                         <Eye className="w-5 h-5" />
                         {selectedVideo.views || 0} просмотров
                       </div>
-                      <div className="flex items-center gap-2">
-                        <VideoIcon className="w-5 h-5" />
-                        {selectedVideo.duration}
-                      </div>
+                      {selectedVideo.duration && (
+                        <div className="flex items-center gap-2">
+                          <VideoIcon className="w-5 h-5" />
+                          {selectedVideo.duration}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

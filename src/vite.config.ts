@@ -9,18 +9,22 @@ export default defineConfig({
       '@': path.resolve(__dirname, './'),
     },
   },
-  server: {
-    host: '0.0.0.0', // Разрешает доступ из локальной сети
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      },
-      '/uploads': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'esbuild',
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          motion: ['motion'],
+        },
       },
     },
+  },
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
   },
 })

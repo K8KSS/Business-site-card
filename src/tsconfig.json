@@ -26,6 +26,7 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["*.ts", "*.tsx", "components/**/*.ts", "components/**/*.tsx", "utils/**/*.ts", "utils/**/*.tsx"],
+  "exclude": ["node_modules", "dist", "build", "server", "supabase", "vite.config.ts", "postcss.config.cjs", "tailwind.config.cjs", "check-*.js", "debug-*.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

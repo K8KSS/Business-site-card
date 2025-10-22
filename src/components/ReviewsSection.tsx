@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { MessageCircle, Star, ThumbsUp, Calendar, User } from "lucide-react";
+import { MessageCircle, Star, Calendar, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { reviewsApi } from "../utils/supabase/client";
 
 export default function ReviewsSection() {
@@ -49,14 +49,7 @@ export default function ReviewsSection() {
     }
   };
 
-  const handleLike = async (reviewId: string) => {
-    try {
-      await reviewsApi.like(reviewId);
-      await loadReviews();
-    } catch (error) {
-      console.error("Failed to like", error);
-    }
-  };
+  // Лайки убраны по требованию клиента
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -248,22 +241,9 @@ export default function ReviewsSection() {
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-gray-700 leading-relaxed mb-4">
+                  <p className="text-gray-700 leading-relaxed">
                     {review.text}
                   </p>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-4">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleLike(review.id)}
-                      className="flex items-center gap-2 text-purple-600 hover:text-purple-700"
-                    >
-                      <ThumbsUp className="w-5 h-5" />
-                      <span>{review.likes || 0}</span>
-                    </motion.button>
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -291,9 +271,17 @@ export default function ReviewsSection() {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-8 h-8 text-yellow-400 fill-yellow-400" />
-                  ))}
+                  {[...Array(5)].map((_, i) => {
+                    const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+                    return (
+                      <Star 
+                        key={i} 
+                        className={`w-8 h-8 ${
+                          i < Math.round(avgRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+                        }`} 
+                      />
+                    );
+                  })}
                 </div>
                 <p className="text-gray-600">Средний рейтинг</p>
               </div>

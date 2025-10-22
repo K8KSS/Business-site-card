@@ -1,8 +1,29 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Award, GraduationCap, Heart, Music } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { pagesApi } from "../utils/supabase/client";
 
 export default function AboutSection() {
+  const defaultImage = "https://images.unsplash.com/photo-1750924718882-33ee16ddf3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFjaGVyJTIwcG9ydHJhaXQlMjB3b21hbnxlbnwxfHx8fDE3NjA1NjY4NTV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
+  
+  const [pageData, setPageData] = useState<any>({ image_url: defaultImage });
+
+  useEffect(() => {
+    loadPageData();
+  }, []);
+
+  const loadPageData = async () => {
+    try {
+      const data = await pagesApi.getPage('about');
+      if (data && data.image_url) {
+        setPageData(data);
+      }
+    } catch (error) {
+      console.error('Error loading about page:', error);
+      // Keep using default image on error
+    }
+  };
   return (
     <div className="container mx-auto px-4 py-16">
       <motion.div
@@ -46,7 +67,7 @@ export default function AboutSection() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-400 rounded-3xl blur-xl opacity-30" />
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1750924718882-33ee16ddf3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFjaGVyJTIwcG9ydHJhaXQlMjB3b21hbnxlbnwxfHx8fDE3NjA1NjY4NTV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+              src={pageData.image_url}
               alt="Парфирова Елена Юрьевна"
               className="relative w-full h-[600px] object-cover rounded-3xl shadow-2xl"
             />

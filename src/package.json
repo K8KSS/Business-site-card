@@ -4,13 +4,12 @@
   "description": "Сайт музыкального руководителя Парфировой Елены Юрьевны",
   "type": "module",
   "scripts": {
-    "check": "node check-system.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "vite",
     "dev:server": "node --watch server/index.js",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "setup": "node server/setup-db.js"
+    "start": "npm run build && npm run preview"
   },
   "dependencies": {
     "react": "^18.3.1",

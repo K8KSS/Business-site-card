@@ -8,10 +8,16 @@ export async function initializeDemoData() {
   
   try {
     // Check if data already exists
-    const existingPublications = await kv.getByPrefix('publication:');
+    const existingPublications = await kv.getByPrefix('publication:').catch(() => []);
     if (existingPublications && existingPublications.length > 0) {
       console.log('✅ Demo data already exists, skipping initialization');
       return { success: true, message: 'Demo data already exists' };
+    }
+    
+    // Check if pages already exist
+    const existingPages = await kv.getByPrefix('page:').catch(() => []);
+    if (existingPages && existingPages.length > 0) {
+      console.log('✅ Pages already exist, skipping pages initialization');
     }
     
     // Sample Publications
@@ -112,16 +118,18 @@ export async function initializeDemoData() {
         id: 'port-1',
         title: 'Диплом о высшем образовании',
         organization: 'Педагогический университет',
-        category: 'Педагогические',
+        category: 'diploma',
         image: '',
+        image_url: '',
         date: new Date('2010-06-20').toISOString(),
       },
       {
         id: 'port-2',
         title: 'Сертификат повышения квалификации',
         organization: 'Институт развития образования',
-        category: 'Дополнительные',
+        category: 'certificate',
         image: '',
+        image_url: '',
         date: new Date('2023-05-15').toISOString(),
       },
     ];
@@ -218,6 +226,33 @@ export async function initializeDemoData() {
     }
     console.log(`✅ Created ${videos.length} videos`);
     
+    // Sample Pages (only create if they don't exist)
+    const pages = [
+      {
+        id: 'home',
+        title: 'Главная страница',
+        content: '',
+        image_url: 'https://images.unsplash.com/photo-1750924718882-33ee16ddf3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFjaGVyJTIwcG9ydHJhaXQlMjB3b21hbnxlbnwxfHx8fDE3NjA1NjY4NTV8MA&ixlib=rb-4.1.0&q=80&w=1080',
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 'about',
+        title: 'О себе',
+        content: '',
+        image_url: 'https://images.unsplash.com/photo-1750924718882-33ee16ddf3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx8fDE3NjA1NjY4NTV8MA&ixlib=rb-4.1.0&q=80&w=1080',
+        updated_at: new Date().toISOString(),
+      },
+    ];
+    
+    let pagesCreated = 0;
+    if (existingPages.length === 0) {
+      for (const page of pages) {
+        await kv.set(`page:${page.id}`, page);
+        pagesCreated++;
+      }
+      console.log(`✅ Created ${pagesCreated} pages`);
+    }
+    
     console.log('✅ Demo data initialization completed!');
     
     return {
@@ -231,6 +266,7 @@ export async function initializeDemoData() {
         reviews: reviews.length,
         audio: audio.length,
         videos: videos.length,
+        pages: pagesCreated,
       }
     };
     

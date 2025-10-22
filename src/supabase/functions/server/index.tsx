@@ -48,29 +48,81 @@ const initializeStorage = async () => {
     
     if (!bucketExists) {
       const { error } = await supabase.storage.createBucket(bucketName, {
-        public: false,
+        public: true, // Make bucket public for easier access
         fileSizeLimit: 52428800, // 50MB
+        allowedMimeTypes: [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'audio/mpeg',
+          'audio/mp3',
+          'audio/wav',
+        ]
       });
       
       if (error) {
-        console.error('Error creating storage bucket:', error);
+        console.error('❌ Error creating storage bucket:', error);
       } else {
         console.log('✅ Storage bucket created:', bucketName);
       }
     } else {
       console.log('✅ Storage bucket exists:', bucketName);
+      
+      // Try to update bucket to public if it exists
+      try {
+        await supabase.storage.updateBucket(bucketName, {
+          public: true,
+          fileSizeLimit: 52428800,
+        });
+        console.log('✅ Storage bucket updated to public');
+      } catch (err) {
+        console.log('Note: Could not update bucket (may already be public)');
+      }
     }
   } catch (error) {
-    console.error('Error initializing storage:', error);
+    console.error('❌ Error initializing storage:', error);
   }
 };
 
-// Initialize on startup
-initializeStorage();
-initializeDemoData();
+// Initialize storage on startup (with retry logic)
+const initStorageWithRetry = async (retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await initializeStorage();
+      console.log('✅ Storage initialized successfully');
+      return;
+    } catch (err) {
+      console.error(`❌ Storage init attempt ${i + 1} failed:`, err);
+      if (i < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+      }
+    }
+  }
+  console.error('❌ Storage initialization failed after all retries');
+};
+
+initStorageWithRetry();
+
+// Initialize demo data on first request (lazy loading)
+let demoDataInitialized = false;
+async function ensureDemoData() {
+  if (!demoDataInitialized) {
+    try {
+      await initializeDemoData();
+      demoDataInitialized = true;
+    } catch (error) {
+      console.error('Demo data init error:', error);
+    }
+  }
+}
 
 // Health check endpoint
-app.get("/make-server-322de762/health", (c) => {
+app.get("/make-server-322de762/health", async (c) => {
+  await ensureDemoData();
   return c.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
@@ -131,17 +183,24 @@ app.post("/make-server-322de762/api/publications", async (c) => {
     const body = await c.req.json();
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
+    console.log('📝 Creating publication with data:', body);
+    
     const publication = {
       id,
       title: body.title,
       description: body.description,
       category: body.category,
-      image: body.image || '',
+      image: body.image || body.cover_image || '',
+      cover_image: body.cover_image || body.image || '',
       file_url: body.file_url || null,
-      date: new Date().toISOString(),
+      date: body.date || new Date().toISOString(),
     };
     
+    console.log('💾 Saving publication:', publication);
+    
     await kv.set(`publication:${id}`, publication);
+    
+    console.log('✅ Publication created successfully with id:', id);
     
     return c.json({ id, message: 'Publication created' });
   } catch (error) {
@@ -156,8 +215,11 @@ app.put("/make-server-322de762/api/publications/:id", async (c) => {
     const id = c.req.param('id');
     const body = await c.req.json();
     
+    console.log(`📝 Updating publication ${id} with data:`, body);
+    
     const existing = await kv.get(`publication:${id}`);
     if (!existing) {
+      console.error(`❌ Publication ${id} not found`);
       return c.json({ error: 'Publication not found' }, 404);
     }
     
@@ -166,10 +228,27 @@ app.put("/make-server-322de762/api/publications/:id", async (c) => {
       title: body.title,
       description: body.description,
       category: body.category,
-      ...(body.file_url && { file_url: body.file_url }),
+      date: body.date || existing.date,
     };
     
+    // Update file_url if provided
+    if (body.file_url !== undefined) {
+      updated.file_url = body.file_url;
+      console.log('📄 Updated file_url:', body.file_url);
+    }
+    
+    // Update cover_image and image if provided
+    if (body.cover_image !== undefined) {
+      updated.cover_image = body.cover_image;
+      updated.image = body.cover_image;
+      console.log('🖼️ Updated cover_image:', body.cover_image);
+    }
+    
+    console.log('💾 Saving updated publication:', updated);
+    
     await kv.set(`publication:${id}`, updated);
+    
+    console.log('✅ Publication updated successfully');
     
     return c.json({ message: 'Publication updated' });
   } catch (error) {
@@ -224,6 +303,40 @@ app.post("/make-server-322de762/api/albums", async (c) => {
   } catch (error) {
     console.error('Error creating album:', error);
     return c.json({ error: 'Server error while creating album' }, 500);
+  }
+});
+
+// Update album
+app.put("/make-server-322de762/api/albums/:id", async (c) => {
+  try {
+    const albumId = c.req.param('id');
+    const body = await c.req.json();
+    
+    console.log(`📝 Updating album ${albumId}:`, body);
+    
+    const album = await kv.get(`album:${albumId}`);
+    if (!album) {
+      console.error(`❌ Album ${albumId} not found`);
+      return c.json({ error: 'Album not found' }, 404);
+    }
+    
+    console.log(`📖 Current album data:`, album);
+    
+    // Update album properties
+    album.title = body.title !== undefined ? body.title : album.title;
+    album.cover = body.cover !== undefined ? body.cover : album.cover;
+    album.photos = body.photos !== undefined ? body.photos : album.photos;
+    
+    console.log(`💾 Saving updated album:`, album);
+    
+    await kv.set(`album:${albumId}`, album);
+    
+    console.log(`✅ Album ${albumId} updated successfully`);
+    
+    return c.json({ id: albumId, message: 'Album updated' });
+  } catch (error) {
+    console.error('Error updating album:', error);
+    return c.json({ error: 'Server error while updating album' }, 500);
   }
 });
 
@@ -339,14 +452,20 @@ app.post("/make-server-322de762/api/portfolio", async (c) => {
     const body = await c.req.json();
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
+    // Use image_url as the primary field, fallback to image for compatibility
+    const imageUrl = body.image_url || body.image || '';
+    
     const item = {
       id,
       title: body.title,
       organization: body.organization,
       category: body.category,
-      image: body.image || '',
-      date: new Date().toISOString(),
+      image: imageUrl, // Keep both fields in sync
+      image_url: imageUrl,
+      date: body.date || new Date().toISOString(),
     };
+    
+    console.log('📝 Creating portfolio item:', item);
     
     await kv.set(`portfolio:${id}`, item);
     
@@ -354,6 +473,43 @@ app.post("/make-server-322de762/api/portfolio", async (c) => {
   } catch (error) {
     console.error('Error creating portfolio item:', error);
     return c.json({ error: 'Server error while creating portfolio item' }, 500);
+  }
+});
+
+// Update portfolio item
+app.put("/make-server-322de762/api/portfolio/:id", async (c) => {
+  try {
+    const portfolioId = c.req.param('id');
+    const body = await c.req.json();
+    
+    const item = await kv.get(`portfolio:${portfolioId}`);
+    if (!item) {
+      return c.json({ error: 'Portfolio item not found' }, 404);
+    }
+    
+    // Update item properties
+    item.title = body.title !== undefined ? body.title : item.title;
+    item.organization = body.organization !== undefined ? body.organization : item.organization;
+    item.category = body.category !== undefined ? body.category : item.category;
+    item.date = body.date !== undefined ? body.date : item.date;
+    
+    // Handle image update - keep both fields in sync
+    if (body.image_url !== undefined) {
+      item.image_url = body.image_url;
+      item.image = body.image_url; // Keep both fields in sync
+    } else if (body.image !== undefined) {
+      item.image = body.image;
+      item.image_url = body.image; // Keep both fields in sync
+    }
+    
+    console.log('📝 Updating portfolio item:', item);
+    
+    await kv.set(`portfolio:${portfolioId}`, item);
+    
+    return c.json({ id: portfolioId, message: 'Portfolio item updated' });
+  } catch (error) {
+    console.error('Error updating portfolio item:', error);
+    return c.json({ error: 'Server error while updating portfolio item' }, 500);
   }
 });
 
@@ -663,6 +819,66 @@ app.delete("/make-server-322de762/api/videos/:id", async (c) => {
   }
 });
 
+// ========== PAGES API ==========
+
+// Get page content
+app.get("/make-server-322de762/api/pages/:pageId", async (c) => {
+  try {
+    await ensureDemoData();
+    const pageId = c.req.param('pageId');
+    const page = await kv.get(`page:${pageId}`);
+    
+    if (!page) {
+      // Return default page structure if not found
+      const defaultImage = 'https://images.unsplash.com/photo-1750924718882-33ee16ddf3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFjaGVyJTIwcG9ydHJhaXQlMjB3b21hbnxlbnwxfHx8fDE3NjA1NjY4NTV8MA&ixlib=rb-4.1.0&q=80&w=1080';
+      return c.json({
+        id: pageId,
+        title: '',
+        content: '',
+        image_url: defaultImage,
+      });
+    }
+    
+    return c.json(page);
+  } catch (error) {
+    console.error('Error getting page:', error);
+    return c.json({ error: 'Server error while getting page' }, 500);
+  }
+});
+
+// Update page content
+app.put("/make-server-322de762/api/pages/:pageId", async (c) => {
+  try {
+    const pageId = c.req.param('pageId');
+    const body = await c.req.json();
+    
+    console.log(`📝 Updating page ${pageId} with data:`, body);
+    
+    // Get existing page data or create new
+    const existingPage = await kv.get(`page:${pageId}`) || {};
+    
+    const page = {
+      ...existingPage,
+      id: pageId,
+      title: body.title !== undefined ? body.title : existingPage.title || '',
+      content: body.content !== undefined ? body.content : existingPage.content || '',
+      image_url: body.image_url !== undefined ? body.image_url : existingPage.image_url || '',
+      updated_at: new Date().toISOString(),
+    };
+    
+    console.log(`💾 Saving page ${pageId}:`, page);
+    
+    await kv.set(`page:${pageId}`, page);
+    
+    console.log(`✅ Page ${pageId} updated successfully`);
+    
+    return c.json({ id: pageId, message: 'Page updated successfully' });
+  } catch (error) {
+    console.error('Error updating page:', error);
+    return c.json({ error: 'Server error while updating page' }, 500);
+  }
+});
+
 // ========== ADMIN API ==========
 
 // Admin login
@@ -688,6 +904,7 @@ app.post("/make-server-322de762/api/admin/login", async (c) => {
 // Get stats
 app.get("/make-server-322de762/api/stats", async (c) => {
   try {
+    await ensureDemoData();
     const publications = await kv.getByPrefix('publication:') || [];
     const albums = await kv.getByPrefix('album:') || [];
     const reviews = await kv.getByPrefix('review:') || [];
@@ -713,20 +930,154 @@ app.get("/make-server-322de762/api/stats", async (c) => {
   }
 });
 
+// Manual initialization endpoint (for debugging)
+app.post("/make-server-322de762/api/admin/init-data", async (c) => {
+  try {
+    const result = await initializeDemoData();
+    return c.json(result);
+  } catch (error: any) {
+    console.error('Error initializing data:', error);
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// Manual bucket creation endpoint (for debugging)
+app.post("/make-server-322de762/api/admin/init-storage", async (c) => {
+  try {
+    await initializeStorage();
+    return c.json({ success: true, message: 'Storage initialization attempted' });
+  } catch (error: any) {
+    console.error('Error initializing storage:', error);
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// Check storage status
+app.get("/make-server-322de762/api/admin/storage-status", async (c) => {
+  try {
+    const supabase = getAdminClient();
+    const bucketName = 'make-322de762-files';
+    
+    const { data: buckets, error } = await supabase.storage.listBuckets();
+    
+    if (error) {
+      return c.json({ error: error.message }, 500);
+    }
+    
+    const bucket = buckets?.find(b => b.name === bucketName);
+    
+    return c.json({
+      exists: !!bucket,
+      bucket: bucket || null,
+      allBuckets: buckets?.map(b => ({ name: b.name, public: b.public }))
+    });
+  } catch (error: any) {
+    console.error('Error checking storage:', error);
+    return c.json({ success: false, error: error.message }, 500);
+  }
+});
+
+// ========== PAGES API ==========
+
+// Get page by ID
+app.get("/make-server-322de762/api/pages/:id", async (c) => {
+  try {
+    const pageId = c.req.param('id');
+    const page = await kv.get(`page:${pageId}`);
+    
+    if (!page) {
+      // Return default empty page if not found
+      return c.json({
+        id: pageId,
+        title: '',
+        content: '',
+        image_url: null
+      });
+    }
+    
+    return c.json(page);
+  } catch (error) {
+    console.error('Error getting page:', error);
+    return c.json({ error: 'Server error while getting page' }, 500);
+  }
+});
+
+// Update page
+app.put("/make-server-322de762/api/pages/:id", async (c) => {
+  try {
+    const pageId = c.req.param('id');
+    const body = await c.req.json();
+    
+    console.log(`📝 Updating page ${pageId}:`, body);
+    
+    // Get existing page or create new one
+    let page = await kv.get(`page:${pageId}`) || {
+      id: pageId,
+      title: '',
+      content: '',
+      image_url: null
+    };
+    
+    // Update page properties
+    page.title = body.title !== undefined ? body.title : page.title;
+    page.content = body.content !== undefined ? body.content : page.content;
+    page.image_url = body.image_url !== undefined ? body.image_url : page.image_url;
+    
+    console.log(`💾 Saving page ${pageId}:`, page);
+    
+    await kv.set(`page:${pageId}`, page);
+    
+    console.log(`✅ Page ${pageId} updated successfully`);
+    
+    return c.json({ id: pageId, message: 'Page updated', page });
+  } catch (error) {
+    console.error('Error updating page:', error);
+    return c.json({ error: 'Server error while updating page' }, 500);
+  }
+});
+
 // ========== FILE UPLOAD API ==========
 
 // Upload file to Supabase Storage
 app.post("/make-server-322de762/api/upload", async (c) => {
   try {
+    console.log('📤 Upload request received');
+    
+    // Ensure storage is initialized before upload
+    const supabase = getAdminClient();
+    const bucketName = 'make-322de762-files';
+    
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+      
+      if (!bucketExists) {
+        console.log('⚠️ Bucket not found, initializing storage...');
+        await initializeStorage();
+        console.log('✅ Storage initialized on-demand');
+      }
+    } catch (initError) {
+      console.error('⚠️ Could not check/initialize bucket:', initError);
+      // Continue anyway - might still work
+    }
+    
     const formData = await c.req.formData();
     const file = formData.get('file') as File;
     
     if (!file) {
+      console.error('❌ No file in request');
       return c.json({ error: 'No file provided' }, 400);
     }
     
+    console.log('📁 File details:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+    
     const supabase = getAdminClient();
     const bucketName = 'make-322de762-files';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     
     // Generate unique filename
     const timestamp = Date.now();
@@ -734,8 +1085,12 @@ app.post("/make-server-322de762/api/upload", async (c) => {
     const ext = file.name.split('.').pop();
     const fileName = `${timestamp}-${randomStr}.${ext}`;
     
+    console.log('📝 Generated filename:', fileName);
+    
     // Upload to Supabase Storage
     const fileBuffer = await file.arrayBuffer();
+    console.log('⬆️ Uploading to storage...');
+    
     const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(fileName, fileBuffer, {
@@ -744,23 +1099,37 @@ app.post("/make-server-322de762/api/upload", async (c) => {
       });
     
     if (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       return c.json({ error: `Upload failed: ${error.message}` }, 500);
     }
     
-    // Get signed URL (valid for 1 year)
-    const { data: signedUrlData } = await supabase.storage
+    console.log('✅ File uploaded successfully:', data);
+    
+    // Get public URL (bucket is public)
+    const { data: publicUrlData } = supabase.storage
       .from(bucketName)
-      .createSignedUrl(fileName, 31536000); // 1 year in seconds
+      .getPublicUrl(fileName);
+    
+    const publicUrl = publicUrlData?.publicUrl;
+    
+    if (!publicUrl) {
+      console.error('❌ Failed to get public URL');
+      return c.json({ error: 'Failed to generate file URL' }, 500);
+    }
+    
+    console.log('✅ Public URL generated:', publicUrl);
     
     return c.json({ 
-      url: signedUrlData?.signedUrl,
+      url: publicUrl,
       path: fileName,
       message: 'File uploaded successfully' 
     });
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    return c.json({ error: 'Server error while uploading file' }, 500);
+  } catch (error: any) {
+    console.error('❌ Error uploading file:', error);
+    return c.json({ 
+      error: 'Server error while uploading file',
+      details: error.message || String(error)
+    }, 500);
   }
 });
 

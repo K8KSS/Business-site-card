@@ -3,20 +3,19 @@ import { motion } from "motion/react";
 import { FileText, Calendar, Download, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { portfolioApi } from "../utils/supabase/client";
 
-const categories = [
-  { id: "all", label: "Все", color: "bg-gray-500" },
-  { id: "teaching", label: "Педагогическое мастерство", color: "bg-pink-500" },
-  { id: "professional", label: "Профессиональное развитие", color: "bg-purple-500" },
-  { id: "recognition", label: "Признание заслуг", color: "bg-blue-500" },
-  { id: "methodology", label: "Методическая работа", color: "bg-green-500" },
-  { id: "mentoring", label: "Наставничество", color: "bg-orange-500" },
-  { id: "education", label: "Образование", color: "bg-indigo-500" },
-];
+const getCategoryLabel = (categoryId: string) => {
+  const categories: Record<string, string> = {
+    diploma: "Диплом",
+    certificate: "Сертификат",
+    gratitude: "Благодарность",
+  };
+  return categories[categoryId] || categoryId;
+};
 
 export default function Portfolio() {
   const [diplomas, setDiplomas] = useState<any[]>([]);
@@ -43,22 +42,40 @@ export default function Portfolio() {
   };
 
   const handleDownload = async (diploma: any) => {
-    if (!diploma.image) {
+    const imageUrl = diploma.image_url || diploma.image;
+    if (!imageUrl) {
       toast.error("Изображение недоступно");
       return;
     }
     
     try {
+      // For better compatibility, use fetch and blob
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = diploma.image;
+      link.href = url;
       link.download = `${diploma.title}.jpg`;
-      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       toast.success("Скачивание началось!");
     } catch (error) {
-      toast.error("Ошибка скачивания");
+      // Fallback to direct download
+      try {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `${diploma.title}.jpg`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Скачивание началось!");
+      } catch (err) {
+        console.error("Download error:", error);
+        toast.error("Ошибка скачивания");
+      }
     }
   };
 
@@ -103,8 +120,8 @@ export default function Portfolio() {
             whileHover={{ scale: 1.05 }}
             className="bg-gradient-to-br from-pink-500 to-purple-500 rounded-3xl p-6 text-white shadow-lg"
           >
-            <div className="text-4xl md:text-5xl mb-2">{diplomas.length}</div>
-            <div className="text-lg md:text-xl opacity-90">Документов в портфолио</div>
+            <div className="text-3xl md:text-5xl mb-2">{diplomas.length}</div>
+            <div className="text-base md:text-xl opacity-90">Документов в портфолио</div>
           </motion.div>
 
           <motion.div
@@ -114,10 +131,10 @@ export default function Portfolio() {
             whileHover={{ scale: 1.05 }}
             className="bg-gradient-to-br from-purple-500 to-blue-500 rounded-3xl p-6 text-white shadow-lg"
           >
-            <div className="text-4xl md:text-5xl mb-2">
+            <div className="text-3xl md:text-5xl mb-2">
               {new Date().getFullYear() - 2010}+
             </div>
-            <div className="text-lg md:text-xl opacity-90">Лет опыта</div>
+            <div className="text-base md:text-xl opacity-90">Лет опыта</div>
           </motion.div>
 
           <motion.div
@@ -127,8 +144,8 @@ export default function Portfolio() {
             whileHover={{ scale: 1.05 }}
             className="bg-gradient-to-br from-blue-500 to-teal-500 rounded-3xl p-6 text-white shadow-lg"
           >
-            <div className="text-4xl md:text-5xl mb-2">{categories.length - 1}</div>
-            <div className="text-lg md:text-xl opacity-90">Категорий наград</div>
+            <div className="text-3xl md:text-5xl mb-2">3</div>
+            <div className="text-base md:text-xl opacity-90">Категорий наград</div>
           </motion.div>
         </div>
 
@@ -152,7 +169,7 @@ export default function Portfolio() {
                   className="w-full h-full"
                 >
                   <ImageWithFallback
-                    src={diploma.image}
+                    src={diploma.image_url || diploma.image || ""}
                     alt={diploma.title}
                     className="w-full h-full object-cover"
                   />
@@ -161,7 +178,7 @@ export default function Portfolio() {
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
                   <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs md:text-sm">
-                    {diploma.category}
+                    {getCategoryLabel(diploma.category)}
                   </Badge>
                 </div>
 
@@ -214,6 +231,13 @@ export default function Portfolio() {
           ))}
         </div>
 
+        {diplomas.length === 0 && (
+          <div className="text-center py-12">
+            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">Портфолио пока пусто</p>
+          </div>
+        )}
+
         {/* Preview Dialog */}
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
           <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-6">
@@ -234,7 +258,7 @@ export default function Portfolio() {
                   {/* Full Size Image */}
                   <div className="relative w-full mb-6">
                     <ImageWithFallback
-                      src={selectedDiploma.image}
+                      src={selectedDiploma.image_url || selectedDiploma.image || ""}
                       alt={selectedDiploma.title}
                       className="w-full h-auto rounded-2xl shadow-2xl"
                     />
@@ -243,7 +267,7 @@ export default function Portfolio() {
                   {/* Info */}
                   <div className="space-y-4">
                     <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">
-                      {selectedDiploma.category}
+                      {getCategoryLabel(selectedDiploma.category)}
                     </Badge>
 
                     <h3 className="text-2xl md:text-3xl text-gray-800">

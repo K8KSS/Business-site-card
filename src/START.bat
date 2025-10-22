@@ -1,81 +1,150 @@
 @echo off
+chcp 65001 > nul
 cls
+
 echo.
-echo ============================================================
-echo          MUSIC TEACHER WEBSITE - QUICK LAUNCHER
-echo ============================================================
+echo ====================================================================
+echo             MUSIC TEACHER WEBSITE - QUICK START
+echo ====================================================================
 echo.
-echo What would you like to do?
+goto MENU
+
+:MENU
 echo.
-echo   [1] Install project (automatic)
-echo   [2] Install with legacy-peer-deps (if errors)
-echo   [3] Complete reinstall (delete and reinstall)
-echo   [4] Check installation status
-echo   [5] Start website
-echo   [6] Run diagnostics
-echo   [7] View help
-echo   [8] Exit
+echo Select action:
 echo.
-echo ============================================================
+echo   1. Install dependencies (first run)
+echo   2. Run development server
+echo   3. Build production version
+echo   4. Preview production build
+echo   5. Deploy Edge Functions to Supabase
+echo   6. Open README (deployment guide)
+echo   0. Exit
 echo.
 
-set /p choice="Enter your choice (1-8): "
+set /p choice="Enter number: "
 
-if "%choice%"=="1" (
+if "%choice%"=="1" goto INSTALL
+if "%choice%"=="2" goto DEV
+if "%choice%"=="3" goto BUILD
+if "%choice%"=="4" goto PREVIEW
+if "%choice%"=="5" goto DEPLOY
+if "%choice%"=="6" goto README
+if "%choice%"=="0" goto EXIT
+echo.
+echo ERROR: Invalid choice! Try again.
+echo.
+pause
+cls
+goto MENU
+
+:INSTALL
+echo.
+echo ====================================================================
+echo  Installing dependencies...
+echo ====================================================================
+echo.
+call npm install
+if %errorlevel% == 0 (
     echo.
-    echo Starting installation...
-    call INSTALL-NOW.bat
-    goto end
-)
-
-if "%choice%"=="2" (
+    echo OK: Installation complete!
+) else (
     echo.
-    echo Starting alternative installation...
-    call install-alternative.bat
-    goto end
+    echo ERROR: Installation failed!
 )
+echo.
+pause
+cls
+goto MENU
 
-if "%choice%"=="3" (
+:DEV
+echo.
+echo ====================================================================
+echo  Starting development server...
+echo ====================================================================
+echo.
+echo  IMPORTANT: For full functionality, you need to deploy
+echo             Edge Functions to Supabase (menu option 5)
+echo.
+echo  Site will be available at: http://localhost:5173
+echo  Press Ctrl+C to stop
+echo.
+call npm run dev:client
+if %errorlevel% neq 0 (
     echo.
-    echo Starting complete reinstall...
-    call REINSTALL.bat
-    goto end
-)
-
-if "%choice%"=="4" (
-    echo.
-    echo Checking installation status...
-    call CHECK-INSTALLATION.bat
-    goto end
-)
-
-if "%choice%"=="5" (
-    echo.
-    echo Starting website...
-    call start-windows.bat
-    goto end
-)
-
-if "%choice%"=="6" (
-    echo.
-    echo Running diagnostics...
-    call diagnose.bat
-    goto end
-)
-
-if "%choice%"=="7" (
-    cls
-    type READ-ME-FIRST.txt
+    echo ERROR: Failed to start!
     echo.
     pause
-    goto end
 )
+cls
+goto MENU
 
-if "%choice%"=="8" (
-    exit
+:BUILD
+echo.
+echo ====================================================================
+echo  Building production version...
+echo ====================================================================
+echo.
+call npm run build
+echo.
+if %errorlevel% == 0 (
+    echo OK: Build successful! Files in dist/ folder
+) else (
+    echo ERROR: Build failed!
 )
-
-echo Invalid choice. Please run again.
+echo.
 pause
+cls
+goto MENU
 
-:end
+:PREVIEW
+echo.
+echo ====================================================================
+echo  Previewing production build...
+echo ====================================================================
+echo.
+echo  First building, then starting preview server
+echo  Site will be available at (usually): http://localhost:4173
+echo  Press Ctrl+C to stop
+echo.
+call npm run start
+if %errorlevel% neq 0 (
+    echo.
+    echo ERROR: Preview failed!
+    echo.
+    pause
+)
+cls
+goto MENU
+
+:DEPLOY
+echo.
+echo ====================================================================
+echo  Deploying Edge Functions to Supabase
+echo ====================================================================
+echo.
+echo  Starting automatic deployment...
+echo.
+call DEPLOY_EDGE_FUNCTIONS.bat
+echo.
+pause
+cls
+goto MENU
+
+:README
+echo.
+echo ====================================================================
+echo  Opening README.md...
+echo ====================================================================
+echo.
+start README.md
+echo.
+pause
+cls
+goto MENU
+
+:EXIT
+echo.
+echo Goodbye!
+echo.
+exit

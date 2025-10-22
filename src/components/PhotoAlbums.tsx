@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Image as ImageIcon, X, ChevronLeft, ChevronRight, Calendar, Download, Search } from "lucide-react";
+import { Image as ImageIcon, X, ChevronLeft, ChevronRight, Calendar, Download } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Dialog, DialogContent } from "./ui/dialog";
-import { toast } from "sonner@2.0.3";
-import JSZip from "jszip";
+import { toast } from "sonner";
 import { albumsApi } from "../utils/supabase/client";
 
 export default function PhotoAlbums() {
@@ -177,7 +175,7 @@ export default function PhotoAlbums() {
 
                   {/* Photo Thumbnails Preview */}
                   <div className="flex gap-2 overflow-hidden">
-                    {album.photos.slice(0, 4).map((photo, photoIndex) => (
+                    {album.photos.slice(0, 4).map((photo: any, photoIndex: number) => (
                       <motion.div
                         key={photo.id}
                         whileHover={{ scale: 1.1, zIndex: 10 }}
@@ -247,7 +245,7 @@ export default function PhotoAlbums() {
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                  {selectedAlbum.photos.map((photo, photoIndex) => (
+                  {selectedAlbum.photos.map((photo: any, photoIndex: number) => (
                     <motion.div
                       key={photo.id}
                       initial={{ opacity: 0, scale: 0.9 }}

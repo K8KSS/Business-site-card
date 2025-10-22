@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { BookOpen, Download, Search, X, FileText, Calendar, Eye, Filter } from "lucide-react";
+import { BookOpen, Download, Search, FileText, Calendar, Eye, Filter } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { publicationsApi } from "../utils/supabase/client";
@@ -23,9 +23,13 @@ const defaultCategories = [
   { id: "scenarios", label: "Сценарии праздников", color: "bg-yellow-500" },
 ];
 
+const getCategoryLabel = (categoryId: string) => {
+  const category = defaultCategories.find(cat => cat.id === categoryId);
+  return category ? category.label : categoryId;
+};
+
 export default function PublicationsSection() {
   const [publications, setPublications] = useState<any[]>([]);
-  const [categories, setCategories] = useState(defaultCategories);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -54,7 +58,7 @@ export default function PublicationsSection() {
   });
 
   const getCategoryInfo = (categoryId: string) => {
-    return categories.find(cat => cat.id === categoryId) || categories[0];
+    return defaultCategories.find(cat => cat.id === categoryId) || defaultCategories[0];
   };
 
   const handleRead = (publication: any) => {
@@ -158,7 +162,7 @@ export default function PublicationsSection() {
               >
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-4 md:p-6 shadow-lg">
                   <div className="flex flex-wrap gap-2">
-                    {categories.map((category, index) => (
+                    {defaultCategories.map((category, index) => (
                       <motion.button
                         key={category.id}
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -212,7 +216,7 @@ export default function PublicationsSection() {
                       transition={{ duration: 0.3 }}
                     >
                       <ImageWithFallback
-                        src={publication.image || "https://images.unsplash.com/photo-1576495350482-942cde5fb23b?w=400"}
+                        src={publication.cover_image || publication.image || "https://images.unsplash.com/photo-1576495350482-942cde5fb23b?w=400"}
                         alt={publication.title}
                         className="w-full h-40 md:h-48 object-cover"
                       />
@@ -296,10 +300,10 @@ export default function PublicationsSection() {
             {selectedPublication && (
               <div className="space-y-6">
                 {/* Cover Image */}
-                {selectedPublication.image && (
+                {(selectedPublication.cover_image || selectedPublication.image) && (
                   <div className="relative w-full h-64 rounded-2xl overflow-hidden">
                     <ImageWithFallback
-                      src={selectedPublication.image}
+                      src={selectedPublication.cover_image || selectedPublication.image}
                       alt={selectedPublication.title}
                       className="w-full h-full object-cover"
                     />
@@ -309,7 +313,7 @@ export default function PublicationsSection() {
                 {/* Category & Date */}
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge className={`${getCategoryInfo(selectedPublication.category).color} text-white`}>
-                    {getCategoryInfo(selectedPublication.category).label}
+                    {getCategoryLabel(selectedPublication.category)}
                   </Badge>
                   <div className="flex items-center text-gray-500">
                     <Calendar className="w-4 h-4 mr-2" />

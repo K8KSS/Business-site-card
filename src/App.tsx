@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Music, User, BookOpen, Image, Award, FileText, MessageCircle, Mail, Headphones, Video, Settings } from "lucide-react";
+import { Music, User, BookOpen, Image, Award, FileText, MessageCircle, Mail, Headphones, Video } from "lucide-react";
 import { Toaster } from "./components/ui/sonner";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -15,10 +15,49 @@ import AudioSection from "./components/AudioSection";
 import VideoSection from "./components/VideoSection";
 import AdminPanel from "./components/AdminPanel";
 import Footer from "./components/Footer";
+import ConnectionStatus from "./components/ConnectionStatus";
+import LoadingScreen from "./components/LoadingScreen";
+import { API_BASE_URL } from "./utils/supabase/client";
+import { autoCheckStorage } from "./utils/storage-init";
+
+// 🎨 ТЕСТ TAILWIND: Раскомментируйте строку ниже и добавьте <TailwindTest /> в return() для проверки стилей
+// import TailwindTest from "./components/TailwindTest";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<string>("home");
   const [showAdmin, setShowAdmin] = useState(false);
+  const [serverConnected, setServerConnected] = useState<boolean | null>(null);
+
+  // Check server health on mount
+  useEffect(() => {
+    const checkServerHealth = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/health`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        if (response.ok) {
+          console.log('✅ Supabase подключён успешно');
+          setServerConnected(true);
+          
+          // Auto-check and initialize storage if needed
+          autoCheckStorage().catch(err => 
+            console.warn('⚠️ Auto-storage check failed (non-critical):', err)
+          );
+        } else {
+          console.log('ℹ️ Supabase Functions недоступны, используются демо-данные');
+          setServerConnected(false);
+        }
+      } catch (error) {
+        console.log('ℹ️ Работа в демо-режиме (Supabase Functions не настроены)');
+        console.log('💡 Для подключения к базе данных см. README.md раздел "Настройка Supabase"');
+        setServerConnected(false);
+      }
+    };
+    checkServerHealth();
+  }, []);
 
   const sections = [
     { id: "home", label: "Главная", icon: Music },
@@ -58,8 +97,16 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
+  // Show loading screen while checking connection
+  if (serverConnected === null) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      {/* Connection Status Indicator */}
+      <ConnectionStatus isConnected={serverConnected} />
+      
       {/* Animated musical notes background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-10">
         {[...Array(20)].map((_, i) => (
